@@ -14,10 +14,14 @@ dist/
 downloads/
 eggs/
 .eggs/
+etc/
 lib/
+Lib/
 lib64/
 parts/
+Scripts/
 sdist/
+share/
 var/
 wheels/
 pip-wheel-metadata/
