@@ -32,32 +32,32 @@ if st.checkbox('Menampilkan setiap nama kolom dan deskripsinya'):
   st.markdown(
         r"""
         ##### Nama Kolom	dan Keterangan
-        ######## date: Tanggal jalannya perdagangan
-        ######## previous: Harga penutupan hari bursa sebelumnya
-        ######## open_price: Harga pembukaan pada hari tersebut
-        ######## first_trade: -
-        ######## high: Harga tertinggi pada hari tersebut
-        ######## low: Harga terendah pada hari tersebut
-        ######## close: Harga penutupan pada hari tersebut
-        ######## change: Perubahan harga pada hari tersebut
-        ######## volume: Volume perdagangan (dalam satuan lembar)
-        ######## value: Total nilai perdagangan pada hari tersebut
-        ######## frequency: Frekuensi perdagangan pada hari tersebut
-        ######## index_individual: -
-        ######## offer: Nilai penawaran harga jual pada hari tersebut
-        ######## offer_volume: Volume penawaran harga jual pada hari tersebut
-        ######## bid: Nilai penawaran harga beli pada hari tersebut
-        ######## bid_volume: Volume penawaran harga beli pada hari tersebut
-        ######## listed_shares: Jumlah saham yang beredar di masyarakat
-        ######## tradeble_shares: Jumlah saham yang dapat diperjualbelikan oleh masyarakat
-        ######## weight_for_index: -
-        ######## foreign_sell: Total penjualan oleh asing (dalam satuan lembar)
-        ######## foreign_buy: Total pembelian oleh asing (dalam satuan lembar)
-        ######## delisting_date: Tanggal penghapusan pencatatan saham di BEI
-        ######## non_regular_volume: Volume pada pasar non-reguler
-        ######## non_regular_value: Total nilai perdagangan pada pasar non-reguler
-        ######## non_regular_frequency: Total frekuensi transaksi pada pasar non-reguler
-        ######## 
+        ######  date: Tanggal jalannya perdagangan
+        ######  previous: Harga penutupan hari bursa sebelumnya
+        ######  open_price: Harga pembukaan pada hari tersebut
+        ######  first_trade: -
+        ######  high: Harga tertinggi pada hari tersebut
+        ######  low: Harga terendah pada hari tersebut
+        ######  close: Harga penutupan pada hari tersebut
+        ######  change: Perubahan harga pada hari tersebut
+        ######  volume: Volume perdagangan (dalam satuan lembar)
+        ######  value: Total nilai perdagangan pada hari tersebut
+        ######  frequency: Frekuensi perdagangan pada hari tersebut
+        ######  index_individual: -
+        ######  offer: Nilai penawaran harga jual pada hari tersebut
+        ######  offer_volume: Volume penawaran harga jual pada hari tersebut
+        ######  bid: Nilai penawaran harga beli pada hari tersebut
+        ######  bid_volume: Volume penawaran harga beli pada hari tersebut
+        ######  listed_shares: Jumlah saham yang beredar di masyarakat
+        ######  tradeble_shares: Jumlah saham yang dapat diperjualbelikan oleh masyarakat
+        ######  weight_for_index: -
+        ######  foreign_sell: Total penjualan oleh asing (dalam satuan lembar)
+        ######  foreign_buy: Total pembelian oleh asing (dalam satuan lembar)
+        ######  delisting_date: Tanggal penghapusan pencatatan saham di BEI
+        ######  non_regular_volume: Volume pada pasar non-reguler
+        ######  non_regular_value: Total nilai perdagangan pada pasar non-reguler
+        ######  non_regular_frequency: Total frekuensi transaksi pada pasar non-reguler
+        ######  
         """
         )
 
