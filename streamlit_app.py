@@ -1,35 +1,128 @@
 import streamlit as st
-import numpy as np
+from datetime import time
+from datetime import date
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn import preprocessing
-from sklearn.datasets import load_boston
-from sklearn.model_selection import train_test_split
+import plotly.figure_factory as ff
+import plotly.graph_objs as go
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
 
-sns.set()
-
-
-# Display a title
-st.title('PENERAPAN CRISP-DM PADA DATA SAHAM PT. TELKOM INDONESIA TBK')
-
-# Create the explanatory variables as DataFrame in pandas
-df = pd.read_csv("./TLKM.csv")
-
-# Display dataset when check box is ON
-if st.checkbox('Lihat dataset dalam format data tabel'): 
-  df["date"] = pd.to_datetime(df["date"])
-  df["date"] = df["date"].dt.strftime("%Y-%m-%d")
-  cols = ["previous","open_price","first_trade","high","low","close","change","volume","value","frequency","index_individual","offer","offer_volume","bid","bid_volume","listed_shares","tradeble_shares","weight_for_index","foreign_sell","foreign_buy","delisting_date","non_regular_volume","non_regular_value","non_regular_frequency"]
-  df[cols] = df[cols].applymap('{:,.1f}'.format)
-  st.dataframe(df)
+import numpy as np
+import math
+sns.set_style("darkgrid")
 
 
-# Show each column description when checkbox is ON.
-if st.checkbox('Menampilkan setiap nama kolom dan deskripsinya'):
-  st.markdown(
+def hitung_regression_roc_auc(y_true, y_pred, num_rounds = 10000):
+    import numpy as np
+
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+
+    num_pairs = 0
+    num_same_sign = 0
+
+    for i, j in _yield_pairs(y_true, num_rounds):
+        diff_true = y_true[i] - y_true[j]
+        diff_score = y_pred[i] - y_pred[j]
+        if diff_true * diff_score > 0:
+            num_same_sign += 1
+        elif diff_score == 0:
+            num_same_sign += .5
+        num_pairs += 1
+
+    return num_same_sign / num_pairs
+
+
+def _yield_pairs(y_true, num_rounds):
+    
+    import numpy as np
+
+    if num_rounds == 'exact':
+        for i in range(len(y_true)):
+            for j in np.where((y_true != y_true[i]) & (np.arange(len(y_true)) > i))[0]:
+                yield i, j     
+    else:
+        for r in range(num_rounds):
+            i = np.random.choice(range(len(y_true)))
+            j = np.random.choice(np.where(y_true != y_true[i])[0])
+            yield i, j
+
+
+def hitung_mape(y_true, y_pred): 
+    y_true, y_pred = np.array(y_true), np.array(y_pred)
+    return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+
+
+def hitung_rmse(y_true, y_pred): 
+    from sklearn.metrics import mean_squared_error
+    return math.sqrt(mean_squared_error(y_true, y_pred))
+
+
+def hitung_r2score(y_true, y_pred):
+    from sklearn.metrics import r2_score
+    return r2_score(y_true, y_pred)
+
+
+def hitung_accuracyscore(y_true, y_pred):
+    from sklearn.metrics import accuracy_score
+    return accuracy_score(y_true, y_pred)
+
+
+def hitung_mae(y_true, y_pred): 
+    from sklearn.metrics import mean_absolute_error
+    return mean_absolute_error(y_true, y_pred)
+
+
+def hitung_mse(y_true, y_pred): 
+    from sklearn.metrics import mean_squared_error
+    return mean_squared_error(y_true, y_pred)
+
+
+def hitung_crossvalidation(model, predictor, target):
+    from sklearn.model_selection import cross_val_score    
+    scores = cross_val_score(model, predictor, target, cv = 10, scoring = 'accuracy') 
+    return scores
+
+
+st.title("PENERAPAN CRISP-DM PADA DATA SAHAM PT. TELKOM INDONESIA TBK (STUDI KASUS: BURSA EFEK INDONESIA TAHUN 2015-2022)")
+
+st.markdown("""
+	
+	## Manfaat Penelitian
+	Manfaat dari penelitian ini adalah :
+
+	1.	Mengetahui hasil prediksi nilai saham perusahaan dalam periode 7 tahun dari 2015 hingga 2022 yang akan digunakan oleh investor untuk berinvestasi saham di IDX.
+	2.	Mengetahui perusahaan mana yang sebaiknya ditinjau harga sahamnya dari aspek keuntungan atau profit.
+	3.	Bagi peneliti selanjutnya, penulis berharap dapat digunakan sebagai referensi untuk penelitian yang akan datang terkait dengan forecasting atau prediksi harga saham.
+	
+""")
+
+st.sidebar.title("Operasi pada Dataset")
+w1 = st.sidebar.checkbox("Tampilkan dataset", False)
+w2 = st.sidebar.checkbox("Menampilkan setiap nama feature dan deskripsinya", False)
+plot = st.sidebar.checkbox("Tampilkan plots", False)
+plothist = st.sidebar.checkbox("Tampilkan hist plots", False)
+linechart = st.sidebar.checkbox("Tampilkan diagram garis", False)
+# distView = st.sidebar.checkbox("Tampilan dist view", False)
+# _3dplot = st.sidebar.checkbox("3D plots", False)
+trainmodel = st.sidebar.checkbox("Melatih model", False)
+dokfold = st.sidebar.checkbox("KFold", False)
+
+# @st.cache
+def read_data():
+    return pd.read_csv("./TLKM.csv")[["date", "previous", "open_price", "first_trade", "high", "low", "index_individual", "offer", "bid", "close"]]
+
+df = read_data()
+
+if w1:
+	df["date"] = pd.to_datetime(df["date"])
+	df["date"] = df["date"].dt.strftime("%Y-%m-%d")
+	st.dataframe(df)
+
+if w2:
+	st.markdown(
         r"""
         ##### Nama Kolom	dan Keterangan
         ######  date: Tanggal jalannya perdagangan
@@ -39,200 +132,190 @@ if st.checkbox('Menampilkan setiap nama kolom dan deskripsinya'):
         ######  high: Harga tertinggi pada hari tersebut
         ######  low: Harga terendah pada hari tersebut
         ######  close: Harga penutupan pada hari tersebut
-        ######  change: Perubahan harga pada hari tersebut
-        ######  volume: Volume perdagangan (dalam satuan lembar)
-        ######  value: Total nilai perdagangan pada hari tersebut
-        ######  frequency: Frekuensi perdagangan pada hari tersebut
         ######  index_individual: -
         ######  offer: Nilai penawaran harga jual pada hari tersebut
-        ######  offer_volume: Volume penawaran harga jual pada hari tersebut
         ######  bid: Nilai penawaran harga beli pada hari tersebut
-        ######  bid_volume: Volume penawaran harga beli pada hari tersebut
-        ######  listed_shares: Jumlah saham yang beredar di masyarakat
-        ######  tradeble_shares: Jumlah saham yang dapat diperjualbelikan oleh masyarakat
-        ######  weight_for_index: -
-        ######  foreign_sell: Total penjualan oleh asing (dalam satuan lembar)
-        ######  foreign_buy: Total pembelian oleh asing (dalam satuan lembar)
-        ######  delisting_date: Tanggal penghapusan pencatatan saham di BEI
-        ######  non_regular_volume: Volume pada pasar non-reguler
-        ######  non_regular_value: Total nilai perdagangan pada pasar non-reguler
-        ######  non_regular_frequency: Total frekuensi transaksi pada pasar non-reguler
         ######  
         """
         )
 
+if plothist:
+    st.subheader("Distribusi setiap feature")
+    options = ("previous", "open_price", "first_trade", "high", "low", "index_individual", "offer", "bid", "close")
+    sel_cols = st.selectbox("Pilih feature", options, 1)
+    st.write(sel_cols)
+    fig = go.Histogram(x=df[sel_cols], nbinsx=50)
+    st.plotly_chart([fig])
+    
 
-# Plot the relation between target and explanatory variables
-# when the checkbox is ON.
-if st.checkbox('Plot hubungan antara variabel target dan variabel penjelas'):
-  # Select one explanatory variable for ploting
-  checked_variable = st.selectbox(
-    'Pilih satu variabel penjelas:',
-    df.drop(columns="close").columns
-    )
-  # Plot
-  fig, ax = plt.subplots(figsize=(5, 3))
-  ax.scatter(x=df[checked_variable], y=df["close"])
-  plt.xlabel(checked_variable)
-  plt.ylabel("close")
-  st.pyplot(fig)
+if plot:
+    st.subheader("Korelasi antara close dan independent variabel")
+    options = ("previous", "open_price", "first_trade", "high", "low", "index_individual", "offer", "bid", "close")
+    w7 = st.selectbox("Pilih kolom", options, 1)
+    st.write(w7)
+    fig, ax = plt.subplots(figsize=(5, 3))
+    plt.scatter(df[w7], df["close"])
+    plt.xlabel(w7)
+    plt.ylabel("close")
+    # plt.title(fig"{w7} vs Close")
+    st.pyplot(fig)
 
+if linechart:
+	st.subheader("Diagram garis untuk semua feature")
+	cols = ["previous", "open_price", "first_trade", "high", "low", "index_individual", "offer", "bid", "close"]
+	df["date"] = pd.to_datetime(df["date"])
+	df["date"] = df["date"].dt.strftime("%Y-%m-%d")
+	df = df.set_index('date')
+	df[cols]
+	st.line_chart(df)
 
-"""
-## Preprocessing
-"""
+# if distView:
+# 	st.subheader("Menampilkan distribusi gabungan")
+# 	# Add histogram data
 
-# Select the variables you will NOT use
-Features_chosen = []
-Features_NonUsed = st.multiselect(
-  'Pilih variabel yang TIDAK akan anda gunakan:', 
-  df.drop(columns="close").columns
-  )
+# 	# Group data together
+# 	hist_data = [df["previous"].values, df["open_price"].values, df["first_trade"].values, df["high"].values, df["low"].values, df["index_individual"].values, df["offer"].values, df["bid"].values]
 
-# # Drop the columns you selected
-df = df.drop(columns=Features_NonUsed)
+# 	group_labels = ["previous", "open_price", "first_trade", "high", "low", "index_individual", "offer", "bid"]
 
+# 	# Create distplot with custom bin_size
+# 	fig = ff.create_distplot(hist_data, group_labels, bin_size=[0.1, 0.25, 0.5])
 
-# # Choose whether you will perform logarithmic transformation
-left_column, right_column = st.columns(2)
-bool_log = left_column.radio(
-      'Anda akan melakukan transformasi logaritmik?', 
-      ('Tidak','Ya')
-      )
+# 	# Plot!
+# 	st.plotly_chart(fig)
 
-df_log, Log_Features = df.copy(), []
-if bool_log == 'Ya':
-  Log_Features = right_column.multiselect(
-          'Pilih variabel yang akan Anda lakukan transformasi logaritma',
-          df.columns
-          )
-  # Perform the lagarithmic transformation
-  df_log[Log_Features] = np.log(df_log[Log_Features])
+# if _3dplot:
+# 	options = st.multiselect(
+#      'Enter columns to plot',('previous', 'open_price', 'first_trade', 'high', 'low', 'index_individual', 'offer', 'bid'),('previous', 'open_price', 'first_trade', 'high', 'low', 'index_individual', 'offer', 'bid', 'close'))
+# 	st.write('You selected:', options)
+# 	st.subheader("previous & open_price vs Close")
+# 	hist_data = [df["previous"].values, df["open_price"].values, df["first_trade"].values, df["high"].values, df["low"].values, df["index_individual"].values, df["offer"].values, df["bid"].values]
 
+# 	#x, y, z = np.random.multivariate_normal(np.array([0, 0, 0]), np.eye(3), 400).transpose()
+# 	trace1 = go.Scatter3d(
+# 		x = hist_data[0],
+# 		y = hist_data[1],
+# 		z = df["close"].values,
+# 		mode = "markers",
+# 		marker = dict(
+# 			size = 8,
+# 			#color=df['sales'],  # set color to an array/list of desired values
+# 			colorscale = "Viridis",  # choose a colorscale
+# 	#        opacity=0.,
+# 		),
+# 	)
 
-# # Choose whether you will perform standardization
-left_column, right_column = st.columns(2)
-bool_std = left_column.radio(
-      'Anda akan melakukan standardisasi?',
-      ('Tidak','Ya')
-      )
-
-df_std = df_log.copy()
-if bool_std == 'Ya':
-  Std_Features_NotUsed = right_column.multiselect(
-          'Pilih variabel yang TIDAK akan Anda lakukan standarisasi', 
-          df_log.drop(columns=["date", "close"]).columns
-          )
-  # Assign the explanatory variables, 
-  # excluded of ones in "Std_Features_NotUsed",
-  # to "Std_Features_chosen"
-  Std_Features_chosen = []
-  for name in df_log.drop(columns=["date", "close"]).columns:
-    if name in Std_Features_NotUsed:
-      continue
-    else:
-      Std_Features_chosen.append(name)
-  # Perform standardization
-  sscaler = preprocessing.StandardScaler()
-  sscaler.fit(df_std[Std_Features_chosen])
-  df_std[Std_Features_chosen] = sscaler.transform(df_std[Std_Features_chosen])
+# 	data = [trace1]
+# 	layout = go.Layout(margin=dict(l=0, r=0, b=0, t=0))
+# 	fig = go.Figure(data=data, layout=layout)
+# 	st.write(fig)
 
 
-# """
-# ### Split the dataset into training and validation datasets
-# """
-# left_column, right_column = st.columns(2)
-# test_size = left_column.number_input(
-#         'Validation data size(rate: 0.0-1.0):',
-#         min_value=0.0,
-#         max_value=1.0,
-#         value=0.2,
-#         step=0.1,
-#          )
-# random_seed = right_column.number_input(
-#               'Random seed(Nonnegative integer):',
-#                 value=0, 
-#                 step=1,
-#                 min_value=0)
+if trainmodel:
+	st.header("Pemodelan")
+	y = df["close"]
+	X = df[["previous", "open_price", "first_trade", "high", "low", "index_individual", "offer", "bid"]].values
+	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+	lrgr = LinearRegression()
+	lrgr.fit(X_train, y_train)
+	pred = lrgr.predict(X_test)
+
+	rocauc = hitung_regression_roc_auc(y_test, pred)
+	r2score = hitung_r2score(y_test, pred)
+	mae = hitung_mae(y_test, pred)
+	mse = hitung_mse(y_test, pred)
+	mape = hitung_mape(y_test, pred)
+	rmse = hitung_rmse(y_test, pred)
+
+	rocauc_li = []
+	r2score_li = []
+	mae_li = []
+	mse_li = []
+	mape_li = []
+	rmse_li = []
+	
+	rocauc_li.append(rocauc)
+	r2score_li.append(r2score)
+	mae_li.append(mae)
+	mse_li.append(mse)
+	mape_li.append(mape)
+	rmse_li.append(rmse)
+	
+	summary = pd.DataFrame(columns=["R2", "ROC-AUC", "MAE", "MSE", "RMSE", "MAPE"])
+	summary["R2"] = r2score_li
+	summary["ROC-AUC"] = rocauc_li
+	summary["MAE"] = mae_li
+	summary["MSE"] = mse_li
+	summary["RMSE"] = rmse_li
+	summary["MAPE"] = mape_li
+	
+	st.write(summary)
+	st.success('Model berhasil dilatih')
 
 
-# # Split the dataset
-# X_train, X_val, Y_train, Y_val = train_test_split(
-#   df_std.drop(columns=["close"]), 
-#   df_std['PRICES'], 
-#   test_size=test_size, 
-#   random_state=random_seed
-#   )
+if dokfold:
+	st.subheader("KFold 10")
+	st.empty()
+	my_bar = st.progress(0)
 
+	from sklearn.model_selection import KFold
 
-# # Create an instance of liner regression
-# regressor = LinearRegression()
-# regressor.fit(X_train, Y_train)
+	X = df[["previous", "open_price", "first_trade", "high", "low", "index_individual", "offer", "bid"]].values
+	y = df["close"]
+		
+	kf = KFold(n_splits=10)
 
-# Y_pred_train = regressor.predict(X_train)
-# Y_pred_val = regressor.predict(X_val)
+	r2_list = []
+	rocauc_list = []
+	mae_list = []
+	mse_list = []
+	rmse_list = []
+	mape_list = []
+	
+	idx = 1
+	fig = plt.figure()
+	i = 0
+	for train_index, test_index in kf.split(X):
+		my_bar.progress(idx * 10)
+		
+		X_train, X_test = X[train_index], X[test_index]
+		y_train, y_test = y[train_index], y[test_index]
 
-# # Perform inverse conversion if the logarithmic transformation was performed.
-# if "close" in Log_Features:
-#   Y_pred_train, Y_pred_val = np.exp(Y_pred_train), np.exp(Y_pred_val)
-#   Y_train, Y_val = np.exp(Y_train), np.exp(Y_val)
+		lrgr = LinearRegression()
+		lrgr.fit(X_train, y_train)
+		pred = lrgr.predict(X_test)
+				
+		rocauc_ = hitung_regression_roc_auc(y_test, pred)
+		r2score_ = hitung_r2score(y_test, pred)
+		mae_ = hitung_mae(y_test, pred)
+		mse_ = hitung_mse(y_test, pred)
+		mape_ = hitung_mape(y_test, pred)
+		rmse_ = hitung_rmse(y_test, pred)	
+		
+		rocauc_list.append(rocauc_)
+		r2_list.append(r2score_)
+		mae_list.append(mae_)
+		mse_list.append(mse_)
+		rmse_list.append(rmse_)
+		mape_list.append(mape_)
 
+		plt.plot(pred, label = f"dataset-{idx}")
+		idx += 1
+	plt.legend()
+	plt.xlabel("Titik data")
+	plt.ylabel("Prediksi")
+	plt.show()
+	st.plotly_chart(fig)
 
+	res = pd.DataFrame(columns=["R2", "ROC-AUC", "MAE", "MSE", "RMSE", "MAPE"])
 
-# """
-# ## Show the results
-# """
+	res["R2"] = r2_list
+	res["ROC-AUC"] = rocauc_list
+	res["MAE"] = mae_list
+	res["MSE"] = mse_list
+	res["RMSE"] = rmse_list
+	res["MAPE"] = mape_list
 
-# """
-# ### Accuracy of the model
-# """
-# R2 = r2_score(Y_val, Y_pred_val)
-# st.write(f'R2 value: {R2:.2f}')
-
-
-# """
-# ### Plot the results
-# """
-# left_column, right_column = st.columns(2)
-# show_train = left_column.radio(
-#         'Plot the result of the training dataset:', 
-#         ('Ya','Tidak')
-#         )
-# show_val = right_column.radio(
-#         'Plot the result of the validation dataset:', 
-#         ('Ya','Tidak')
-#         )
-
-
-# # Get the maximum value of all objective variable data,
-# # including predicted values
-# y_max_train = max([max(Y_train), max(Y_pred_train)])
-# y_max_val = max([max(Y_val), max(Y_pred_val)])
-# y_max = int(max([y_max_train, y_max_val])) 
-
-
-# # Allows the axis range to be changed dynamically
-# left_column, right_column = st.columns(2)
-# x_min = left_column.number_input('x_min:',value=0,step=1)
-# x_max = right_column.number_input('x_max:',value=y_max,step=1)
-# left_column, right_column = st.columns(2)
-# y_min = left_column.number_input('y_min:',value=0,step=1)
-# y_max = right_column.number_input('y_max:',value=y_max,step=1)
-
-
-# # Show the results
-# fig = plt.figure(figsize=(3, 3))
-# if show_train == 'Ya':
-#   plt.scatter(Y_train, Y_pred_train,lw=0.1,color="r",label="training data")
-# if show_val == 'Ya':
-#   plt.scatter(Y_val, Y_pred_val,lw=0.1,color="b",label="validation data")
-# plt.xlabel("close",fontsize=8)
-# plt.ylabel("Prediction of PRICES",fontsize=8)
-# plt.xlim(int(x_min), int(x_max)+5)
-# plt.ylim(int(y_min), int(y_max)+5)
-# plt.legend(fontsize=6)
-# plt.tick_params(labelsize=6)
-
-# # Display by Streamlit
-# st.pyplot(fig)
-
+	st.write(res)
+	st.balloons()

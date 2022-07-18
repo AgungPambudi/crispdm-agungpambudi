@@ -86,7 +86,7 @@ def hitung_crossvalidation(model, predictor, target):
     return scores
 
 
-st.title("PENERAPAN CRISP-DM PADA DATA SAHAM PT. TELKOM INDONESIA TBK")
+st.title("PENERAPAN CRISP-DM PADA DATA SAHAM PT. TELKOM INDONESIA TBK (STUDI KASUS: BURSA EFEK INDONESIA TAHUN 2015-2022)")
 
 st.markdown("""
 	The data set contains information about money spent on advertisement and their generated sales. Money
@@ -174,7 +174,7 @@ if plot:
     st.pyplot(fig)
 
 if linechart:
-	st.subheader("Diagram garis")
+	st.subheader("Diagram garis untuk semua feature")
 	cols = ["previous", "open_price", "first_trade", "high", "low", "index_individual", "offer", "bid", "close"]
 	df["date"] = pd.to_datetime(df["date"])
 	df["date"] = df["date"].dt.strftime("%Y-%m-%d")
