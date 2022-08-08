@@ -1,3 +1,16 @@
+#author          : Agung Pambudi
+#email           : mail@agungpambudi.com
+#linkedin        : http://linkedin.com/in/agungpambudi
+#version         : 0.5
+#
+#
+#==============================================================================
+#                                   _         _ _
+# ___ ___ _ _ ___ ___ ___ ___ _____| |_ _ _ _| |_|  ___ ___ _____
+#| .'| . | | |   | . | . | .'|     | . | | | . | |_|  _| . |     |
+#|__,|_  |___|_|_|_  |  _|__,|_|_|_|___|___|___|_|_|___|___|_|_|_|
+#    |___|       |___|_|
+
 import streamlit as st
 from datetime import time
 from datetime import date
