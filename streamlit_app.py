@@ -107,8 +107,7 @@ st.markdown("""
 	Manfaat dari penelitian ini adalah :
 
 	1.	Mengetahui hasil prediksi nilai saham perusahaan dalam periode 7 tahun dari 2015 hingga 2022 yang akan digunakan oleh investor untuk berinvestasi saham di IDX.
-	2.	Mengetahui perusahaan mana yang sebaiknya ditinjau harga sahamnya dari aspek keuntungan atau profit.
-	3.	Bagi peneliti selanjutnya, penulis berharap dapat digunakan sebagai referensi untuk penelitian yang akan datang terkait dengan forecasting atau prediksi harga saham.
+	2.	Bagi peneliti selanjutnya, penulis berharap dapat digunakan sebagai referensi untuk penelitian yang akan datang terkait dengan forecasting atau prediksi harga saham.
 	
 """)
 
@@ -118,12 +117,9 @@ w2 = st.sidebar.checkbox("Menampilkan setiap nama feature dan deskripsinya", Fal
 plot = st.sidebar.checkbox("Tampilkan plots", False)
 plothist = st.sidebar.checkbox("Tampilkan hist plots", False)
 linechart = st.sidebar.checkbox("Tampilkan diagram garis", False)
-# distView = st.sidebar.checkbox("Tampilan dist view", False)
-# _3dplot = st.sidebar.checkbox("3D plots", False)
 trainmodel = st.sidebar.checkbox("Melatih model", False)
 dokfold = st.sidebar.checkbox("KFold", False)
 
-# @st.cache
 def read_data():
     return pd.read_csv("./TLKM.csv")[["date", "previous", "open_price", "first_trade", "high", "low", "index_individual", "offer", "bid", "close"]]
 
@@ -160,7 +156,6 @@ if plothist:
     fig = go.Histogram(x=df[sel_cols], nbinsx=50)
     st.plotly_chart([fig])
     
-
 if plot:
     st.subheader("Korelasi antara close dan independent variabel")
     options = ("previous", "open_price", "first_trade", "high", "low", "index_individual", "offer", "bid", "close")
@@ -181,48 +176,6 @@ if linechart:
 	df = df.set_index('date')
 	df[cols]
 	st.line_chart(df)
-
-# if distView:
-# 	st.subheader("Menampilkan distribusi gabungan")
-# 	# Add histogram data
-
-# 	# Group data together
-# 	hist_data = [df["previous"].values, df["open_price"].values, df["first_trade"].values, df["high"].values, df["low"].values, df["index_individual"].values, df["offer"].values, df["bid"].values]
-
-# 	group_labels = ["previous", "open_price", "first_trade", "high", "low", "index_individual", "offer", "bid"]
-
-# 	# Create distplot with custom bin_size
-# 	fig = ff.create_distplot(hist_data, group_labels, bin_size=[0.1, 0.25, 0.5])
-
-# 	# Plot!
-# 	st.plotly_chart(fig)
-
-# if _3dplot:
-# 	options = st.multiselect(
-#      'Enter columns to plot',('previous', 'open_price', 'first_trade', 'high', 'low', 'index_individual', 'offer', 'bid'),('previous', 'open_price', 'first_trade', 'high', 'low', 'index_individual', 'offer', 'bid', 'close'))
-# 	st.write('You selected:', options)
-# 	st.subheader("previous & open_price vs Close")
-# 	hist_data = [df["previous"].values, df["open_price"].values, df["first_trade"].values, df["high"].values, df["low"].values, df["index_individual"].values, df["offer"].values, df["bid"].values]
-
-# 	#x, y, z = np.random.multivariate_normal(np.array([0, 0, 0]), np.eye(3), 400).transpose()
-# 	trace1 = go.Scatter3d(
-# 		x = hist_data[0],
-# 		y = hist_data[1],
-# 		z = df["close"].values,
-# 		mode = "markers",
-# 		marker = dict(
-# 			size = 8,
-# 			#color=df['sales'],  # set color to an array/list of desired values
-# 			colorscale = "Viridis",  # choose a colorscale
-# 	#        opacity=0.,
-# 		),
-# 	)
-
-# 	data = [trace1]
-# 	layout = go.Layout(margin=dict(l=0, r=0, b=0, t=0))
-# 	fig = go.Figure(data=data, layout=layout)
-# 	st.write(fig)
-
 
 if trainmodel:
 	st.header("Pemodelan")
