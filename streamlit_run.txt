@@ -1,5 +1,2 @@
-streamlit run regression_on_streamlit.py --server.port 8888
-
-
-
+streamlit run streamlit_app.py --server.port 8888
 streamlit run crispdm-agungpambudi.py --server.port 8888
