@@ -1,6 +1,7 @@
 #author          : Agung Pambudi
 #email           : mail@agungpambudi.com
-#linkedin        : http://linkedin.com/in/agungpambudi
+#linkedin        : https://linkedin.com/in/agungpambudi
+#kaggle          : https://www.kaggle.com/agungpambudi
 #version         : 0.5
 #
 #
